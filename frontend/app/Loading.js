@@ -2,8 +2,7 @@
 
 import { useRef, useEffect } from "react"
 
-export default function Loading(props) {
-    const { state } = props
+export default function Loading({ state }) {
     const ref = useRef(null)
 
     useEffect(() => {
