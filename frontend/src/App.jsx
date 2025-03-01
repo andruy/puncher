@@ -1,35 +1,48 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState } from "react"
+import { createBrowserRouter, RouterProvider } from "react-router-dom"
+import { Outlet } from "react-router-dom"
+import { PrimeReactProvider } from 'primereact/api'
+import "primereact/resources/themes/lara-dark-cyan/theme.css"
+import "primereact/resources/primereact.min.css"
+import 'primeicons/primeicons.css'
+import "primeflex/primeflex.css"
 import './App.css'
+import MenuButton from "./components/MenuButton"
+import Loading from "./components/Loading"
+import Home from "./components/Home"
+import Features from "./components/Features"
+import NotFound from "./components/NotFound"
+
+function Layout({ visible }) {
+	return (
+		<>
+			<MenuButton />
+			<Loading state={visible} />
+			<Outlet />
+		</>
+	)
+}
+
+const router = (visible, setVisible) => createBrowserRouter([
+	{
+		path: "/",
+		element: <Layout visible={visible} />,
+		children: [
+			{ index: true, element: <Home setVisible={setVisible} /> },
+			{ path: "features", element: <Features setVisible={setVisible} /> },
+			{ path: "*", element: <NotFound /> },
+		]
+	}
+])
 
 function App() {
-  const [count, setCount] = useState(0)
+	const [visible, setVisible] = useState(false)
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+	return (
+		<PrimeReactProvider value={{ ripple: true }}>
+			<RouterProvider router={router(visible, setVisible)} />
+		</PrimeReactProvider>
+	)
 }
 
 export default App
