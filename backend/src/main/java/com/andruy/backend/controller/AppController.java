@@ -26,7 +26,7 @@ public class AppController {
     }
 
     @GetMapping("/switchState")
-    public ResponseEntity<Map<String, Boolean>> switchState() {
+    public ResponseEntity<Map<String, Object>> switchState() {
         return ResponseEntity.ok(appService.switchState());
     }
 }

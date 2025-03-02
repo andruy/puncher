@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { InputSwitch } from "primereact/inputswitch"
 import { Button } from "primereact/button"
 import { Toast } from 'primereact/toast'
@@ -19,53 +19,58 @@ export default function Home() {
 		switchOff: '/switchOff'
 	}
 
+	useEffect(() => {
+		sendGetRequest(endpoints.switchState)
+	}, [])
+
 	async function sendPutRequest(endpoint) {
-		setLoadingVisible(true)
 
 		const response = await fetch(endpoint, {
 			method: 'PUT',
 			headers: {
 				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ timer: false })
+			}
 		})
 
 		if (response.ok) {
 			const data = await response.json()
 			console.log(data.message)
-			setLoadingVisible(false)
 
 			if (data.message === 'Something went wrong') {
-                toast.current.show({ severity: 'error', summary: 'Error', detail: data.message })
-            } else {
-                toast.current.show({ severity: 'success', summary: 'Success', detail: data.message })
-            }
+				toast.current.show({ severity: 'error', summary: 'Error', detail: data.message })
+			} else {
+				toast.current.show({ severity: 'success', summary: 'Success', detail: data.message })
+			}
 		} else {
 			console.error(response)
-			setLoadingVisible(false)
 
 			toast.current.show({ severity: 'error', summary: 'Error', detail: 'Something went wrong' })
 		}
 	}
 
 	async function sendGetRequest(endpoint) {
-		setLoadingVisible(true)
+		if (endpoint === endpoints.checkStatus) setLoadingVisible(true)
 
 		const response = await fetch(endpoint)
 
 		if (response.ok) {
 			const data = await response.json()
 			console.log(data.message)
-			setLoadingVisible(false)
+			if (endpoint === endpoints.checkStatus) setLoadingVisible(false)
 
 			if (data.message === 'Something went wrong') {
-                toast.current.show({ severity: 'error', summary: 'Error', detail: data.message })
-            } else {
-                toast.current.show({ severity: 'success', summary: 'Success', detail: data.message })
-            }
+				toast.current.show({ severity: 'error', summary: 'Error', detail: data.message })
+			} else {
+				if (endpoint === endpoints.switchState) {
+					setChecked(data.state)
+					toast.current.show({ severity: 'info', summary: 'State', detail: data.message})
+				} else {
+					toast.current.show({ severity: 'warning', summary: 'Status', detail: data.message })
+				}
+			}
 		} else {
 			console.error(response)
-			setLoadingVisible(false)
+			if (endpoint === endpoints.checkStatus) setLoadingVisible(false)
 
 			toast.current.show({ severity: 'error', summary: 'Error', detail: 'Something went wrong' })
 		}
@@ -76,7 +81,7 @@ export default function Home() {
 			<Loading state={loadingVisible} />
 			<div className={styles.centeredColumn}>
 				<Toast ref={toast} position="bottom-center" />
-				<InputSwitch checked={checked} onChange={e => setChecked(e.value)} />
+				<InputSwitch checked={checked} onChange={e => { sendPutRequest(e.value ? endpoints.switchOn : endpoints.switchOff) && setChecked(e.value) }} />
 				<Button rounded label='Check Status' icon='pi pi-clock' severity="warning" onClick={() => sendGetRequest(endpoints.checkStatus)} />
 			</div>
 		</>

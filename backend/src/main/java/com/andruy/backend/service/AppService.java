@@ -65,10 +65,10 @@ public class AppService {
         }
     }
 
-    public Map<String, Boolean> switchState() {
+    public Map<String, Object> switchState() {
         logger.trace("Called switchState");
 
-        return Map.of("message", AppSettings.isActive());
+        return Map.of("state", AppSettings.isActive(), "message", AppSettings.isActive() ? "Switch is on" : "Switch is off");
     }
 
     @PostConstruct
