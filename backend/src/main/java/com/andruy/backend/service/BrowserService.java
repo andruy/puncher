@@ -251,4 +251,8 @@ public class BrowserService {
 
         return Map.of("logs", sb.toString());
     }
+
+    public void setAction(String action) {
+        this.action = action;
+    }
 }
