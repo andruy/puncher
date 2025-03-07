@@ -93,9 +93,19 @@ public class AppService {
         logger.trace("Switch ON? " + AppSettings.isActive());
         logger.trace("Common halt time at launch: " + AppSettings.getHaltTime());
         logger.trace("Current week from DB: " + AppSettings.getCurrentWeekId());
-        daily();
+        setAppWeek();
+        Thread thread = new Thread() {
+            public void run() {
+                try {
+                    Thread.sleep(10000);
+                    actionScheduler.schedule(weekProgramService.getWeekProgram(AppSettings.getCurrentWeekId()));
+                } catch (InterruptedException e) {
+                    logger.error("Failed to sleep thread at startup", e);
+                }
+            }
+        };
+        thread.start();
         pushNotification.send("Puncher update", "Puncher is now running");
-        actionScheduler.schedule(weekProgramService.getWeekProgram(AppSettings.getCurrentWeekId()));
     }
 
     @Scheduled(cron = "0 5 0 * * 1-7")
@@ -104,8 +114,7 @@ public class AppService {
         logger.trace("Common halt time: " + AppSettings.getHaltTime());
     }
 
-    @Scheduled(cron = "0 0 1 * * 1-7")
-    public void daily() {
+    public void setAppWeek() {
         int id = getTrueCurrentWeekId();
 
         if (AppSettings.getCurrentWeekId() == id) {
@@ -121,6 +130,7 @@ public class AppService {
 
     @Scheduled(cron = "0 5 1 * * 1")
     public void weekly() {
+        setAppWeek();
         actionScheduler.schedule(weekProgramService.getWeekProgram(AppSettings.getCurrentWeekId()));
     }
 }

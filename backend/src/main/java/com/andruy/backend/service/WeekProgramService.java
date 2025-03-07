@@ -63,10 +63,10 @@ public class WeekProgramService {
         for (int i = 0; i < 5; i++) {
             DayProgram dayProgram = new DayProgram(
                 i + 1,
-                LocalDateTime.of(year, 1, 1, 7, 55).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(weekNumber - 1).plusDays(i).atZone(ZoneId.of("America/New_York")).toEpochSecond(),
-                LocalDateTime.of(year, 1, 1, 12, 57).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(weekNumber - 1).plusDays(i).atZone(ZoneId.of("America/New_York")).toEpochSecond(),
-                LocalDateTime.of(year, 1, 1, 13, 55).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(weekNumber - 1).plusDays(i).atZone(ZoneId.of("America/New_York")).toEpochSecond(),
-                LocalDateTime.of(year, 1, 1, 16, 26).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(weekNumber - 1).plusDays(i).atZone(ZoneId.of("America/New_York")).toEpochSecond()
+                LocalDateTime.of(year, 1, 1, 7, 55).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(weekNumber - 1).plusDays(i).atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli(),
+                LocalDateTime.of(year, 1, 1, 12, 57).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(weekNumber - 1).plusDays(i).atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli(),
+                LocalDateTime.of(year, 1, 1, 13, 55).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(weekNumber - 1).plusDays(i).atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli(),
+                LocalDateTime.of(year, 1, 1, 16, 26).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(weekNumber - 1).plusDays(i).atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli()
             );
             dayPrograms.add(dayProgram);
         }
