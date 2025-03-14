@@ -11,6 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.andruy.backend.repository.AppRepository;
+import com.andruy.backend.util.ActionScheduler;
 import com.andruy.backend.util.AppSettings;
 import com.andruy.backend.util.PushNotification;
 
@@ -18,12 +19,17 @@ import jakarta.annotation.PostConstruct;
 
 @Service
 public class AppService {
-    private LocalDate date;
+    private int year;
     private int weekNumber;
+    private LocalDate date;
     @Autowired
     private AppRepository appRepository;
     @Autowired
+    private ActionScheduler actionScheduler;
+    @Autowired
     private PushNotification pushNotification;
+    @Autowired
+    private WeekProgramService weekProgramService;
 
     Logger logger = LoggerFactory.getLogger(AppService.class);
 
@@ -65,10 +71,22 @@ public class AppService {
         }
     }
 
-    public Map<String, Boolean> switchState() {
+    public Map<String, Object> switchState() {
         logger.trace("Called switchState");
 
-        return Map.of("message", AppSettings.isActive());
+        return Map.of("state", AppSettings.isActive(), "message", AppSettings.isActive() ? "Switch is on" : "Switch is off");
+    }
+
+    public Map<String, Boolean> healthCheck() {
+        return Map.of("message", appRepository.healthCheck() == 1);
+    }
+
+    private int getTrueCurrentWeekId() {
+        date = LocalDate.now();
+        weekNumber = date.get(WeekFields.ISO.weekOfYear());
+        year = date.getYear();
+        String concatenated = weekNumber < 10 ? year + "0" + weekNumber : year + "" + weekNumber;
+        return Integer.parseInt(concatenated);
     }
 
     @PostConstruct
@@ -79,6 +97,18 @@ public class AppService {
         logger.trace("Switch ON? " + AppSettings.isActive());
         logger.trace("Common halt time at launch: " + AppSettings.getHaltTime());
         logger.trace("Current week from DB: " + AppSettings.getCurrentWeekId());
+        setAppWeek();
+        Thread thread = new Thread() {
+            public void run() {
+                try {
+                    Thread.sleep(10000);
+                    actionScheduler.schedule(weekProgramService.getWeekProgram(AppSettings.getCurrentWeekId()));
+                } catch (InterruptedException e) {
+                    logger.error("Failed to sleep thread at startup", e);
+                }
+            }
+        };
+        thread.start();
         pushNotification.send("Puncher update", "Puncher is now running");
     }
 
@@ -88,16 +118,11 @@ public class AppService {
         logger.trace("Common halt time: " + AppSettings.getHaltTime());
     }
 
-    @Scheduled(cron = "0 0 1 * * 1-7")
-    public void daily() {
-        date = LocalDate.now();
-        weekNumber = date.get(WeekFields.ISO.weekOfYear());
-        int year = date.getYear();
-        String concatenated = weekNumber < 10 ? year + "0" + weekNumber : year + "" + weekNumber;
-        int id = Integer.parseInt(concatenated);
+    public void setAppWeek() {
+        int id = getTrueCurrentWeekId();
 
         if (AppSettings.getCurrentWeekId() == id) {
-            logger.trace("Week " + id + " already exists in the database and it is set for the app");
+            logger.trace("Current week is " + id);
         } 
 
         if (AppSettings.getCurrentWeekId() < id) {
@@ -105,5 +130,11 @@ public class AppService {
             AppSettings.setCurrentWeekId(id);
             logger.trace("Created week " + id + " in the database and it is now set for the app");
         }
+    }
+
+    @Scheduled(cron = "0 5 1 * * 1")
+    public void weekly() {
+        setAppWeek();
+        actionScheduler.schedule(weekProgramService.getWeekProgram(AppSettings.getCurrentWeekId()));
     }
 }

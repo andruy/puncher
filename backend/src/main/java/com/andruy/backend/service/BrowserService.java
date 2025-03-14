@@ -60,10 +60,11 @@ public class BrowserService {
                 Thread.sleep(AppSettings.getHaltTime());
                 driver.findElement(By.cssSelector("input[type='submit'].BtnAction.DefaultSubmitBehavior")).click();
                 Thread.sleep(AppSettings.getHaltTime());
-                status = "TimeClock returned: " + driver.findElement(By.cssSelector("td.AlertContainer")).getText();
+                status = driver.findElement(By.cssSelector("td.AlertContainer")).getText();
                 logger.trace(status);
 
-                if (status.equals("TimeClock returned: Clock In operation successful")) {
+                if (status.equals("Clock In operation successful")) {
+                    status = "Clocked in";
                     int updated = browserRepository.enterTime(action, System.currentTimeMillis());
 
                     if (updated == 1 && !action.equals("undefined")) {
@@ -113,7 +114,7 @@ public class BrowserService {
             driver.findElement(By.cssSelector("input[type='password'].CustomControlInput")).sendKeys(password);
             driver.findElement(By.cssSelector("input[type='submit'].BtnAction.DefaultSubmitBehavior")).click();
             Thread.sleep(AppSettings.getHaltTime());
-            status = "Current status: " + driver.findElement(By.cssSelector("div[ng-bind='getEmployeeClockStatus()']")).getText();
+            status = driver.findElement(By.cssSelector("div[ng-bind='getEmployeeClockStatus()']")).getText();
             logger.trace(status);
             driver.findElement(By.cssSelector("div[ng-click='logOutEmployee()']")).click();
             Thread.sleep(1000);
@@ -152,10 +153,11 @@ public class BrowserService {
                 Thread.sleep(AppSettings.getHaltTime());
                 driver.findElement(By.cssSelector("input[type='submit'].BtnAction.DefaultSubmitBehavior")).click();
                 Thread.sleep(AppSettings.getHaltTime());
-                status = "TimeClock returned: " + driver.findElement(By.cssSelector("td.AlertContainer")).getText();
+                status = driver.findElement(By.cssSelector("td.AlertContainer")).getText();
                 logger.trace(status);
 
-                if (status.equals("TimeClock returned: Clock Out operation successful")) {
+                if (status.equals("Clock Out operation successful")) {
+                    status = "Clocked out";
                     int updated = browserRepository.enterTime(action, System.currentTimeMillis());
 
                     if (updated == 1 && !action.equals("undefined")) {
@@ -248,5 +250,9 @@ public class BrowserService {
         }
 
         return Map.of("logs", sb.toString());
+    }
+
+    public void setAction(String action) {
+        this.action = action;
     }
 }
