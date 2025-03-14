@@ -77,6 +77,10 @@ public class AppService {
         return Map.of("state", AppSettings.isActive(), "message", AppSettings.isActive() ? "Switch is on" : "Switch is off");
     }
 
+    public Map<String, Boolean> healthCheck() {
+        return Map.of("message", appRepository.healthCheck() == 1);
+    }
+
     private int getTrueCurrentWeekId() {
         date = LocalDate.now();
         weekNumber = date.get(WeekFields.ISO.weekOfYear());

@@ -27,6 +27,12 @@ public class AppRepository {
         return jdbcTemplate.queryForObject(query, Integer.class);
     }
 
+    public int healthCheck() {
+        String query = "SELECT 1 FROM DUAL";
+
+        return jdbcTemplate.queryForObject(query, Integer.class);
+    }
+
     public int currentHaltTime() {
         String query = "SELECT CURRENT_VALUE FROM HALTS WHERE IN_REFERENCE = 'COMMON'";
 

@@ -13,19 +13,19 @@ export default function MenuButton() {
         },
         {
             label: 'Features',
-            icon: 'pi pi-star',
+            icon: 'pi pi-clock',
             command: () => router.push('/features')
         },
         {
-            label: 'About',
-            icon: 'pi pi-info',
-            command: () => router.push('/about')
+            label: 'Programs',
+            icon: 'pi pi-calendar-clock',
+            command: () => router.push('/programs')
         }
     ]
 
     return (
         <div className='card'>
-            <SpeedDial model={items} direction="down" showIcon="pi pi-bars" hideIcon="pi pi-times" buttonClassName="p-button-outlined" style={{ left: 20, top: 20 }} />
+            <SpeedDial model={items} direction="right" showIcon="pi pi-bars" hideIcon="pi pi-times" buttonClassName="p-button-outlined" style={{ left: 20, top: 20 }} />
         </div>
     )
 }

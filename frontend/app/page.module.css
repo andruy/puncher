@@ -4,6 +4,24 @@
   justify-content: center;
   align-items: center;
   gap: 1.5rem;
-  height: 100vh;
-  height: 100dvh;
+}
+
+.centeredColumnSmallGap {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: .1rem;
+}
+
+.limitedWidthAndHeight {
+  max-height: 80%;
+  max-width: 90%;
+  overflow: hidden;
+}
+
+.spreadApart {
+  display: flex;
+  gap: 4rem;
+  align-items: center;
 }

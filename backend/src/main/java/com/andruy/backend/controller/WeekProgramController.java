@@ -1,5 +1,7 @@
 package com.andruy.backend.controller;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,5 +27,10 @@ public class WeekProgramController {
     @PostMapping("/setWeekProgram")
     public ResponseEntity<Boolean> setWeekProgram(@RequestBody WeekProgram weekId) {
         return ResponseEntity.ok(weekProgramService.setWeekProgram(weekId) == 1);
+    }
+
+    @GetMapping("/forDay")
+    public ResponseEntity<WeekProgram> getWeekForDay(@RequestParam LocalDate date) {
+        return ResponseEntity.ok(weekProgramService.getWeekForDay(date));
     }
 }

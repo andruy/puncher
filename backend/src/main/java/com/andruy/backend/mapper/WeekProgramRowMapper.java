@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.springframework.jdbc.core.RowMapper;
 
-import com.andruy.backend.util.DayProgram;
+import com.andruy.backend.util.DayFlag;
 import com.andruy.backend.util.WeekProgram;
 
 public class WeekProgramRowMapper implements RowMapper<WeekProgram> {
@@ -14,44 +14,29 @@ public class WeekProgramRowMapper implements RowMapper<WeekProgram> {
     public WeekProgram mapRow(ResultSet rs, int rowNum) throws SQLException {
         int id = rs.getInt("ID");
 
-        DayProgram monday = new DayProgram(
+        DayFlag monday = new DayFlag(
             1,
-            rs.getLong("MONDAY_MORNING_IN"),
-            rs.getLong("MONDAY_MORNING_OUT"),
-            rs.getLong("MONDAY_AFTERNOON_IN"),
-            rs.getLong("MONDAY_AFTERNOON_OUT")
+            rs.getBoolean("MONDAY")
         );
 
-        DayProgram tuesday = new DayProgram(
+        DayFlag tuesday = new DayFlag(
             2,
-            rs.getLong("TUESDAY_MORNING_IN"),
-            rs.getLong("TUESDAY_MORNING_OUT"),
-            rs.getLong("TUESDAY_AFTERNOON_IN"),
-            rs.getLong("TUESDAY_AFTERNOON_OUT")
+            rs.getBoolean("TUESDAY")
         );
 
-        DayProgram wednesday = new DayProgram(
+        DayFlag wednesday = new DayFlag(
             3,
-            rs.getLong("WEDNESDAY_MORNING_IN"),
-            rs.getLong("WEDNESDAY_MORNING_OUT"),
-            rs.getLong("WEDNESDAY_AFTERNOON_IN"),
-            rs.getLong("WEDNESDAY_AFTERNOON_OUT")
+            rs.getBoolean("WEDNESDAY")
         );
 
-        DayProgram thursday = new DayProgram(
+        DayFlag thursday = new DayFlag(
             4,
-            rs.getLong("THURSDAY_MORNING_IN"),
-            rs.getLong("THURSDAY_MORNING_OUT"),
-            rs.getLong("THURSDAY_AFTERNOON_IN"),
-            rs.getLong("THURSDAY_AFTERNOON_OUT")
+            rs.getBoolean("THURSDAY")
         );
 
-        DayProgram friday = new DayProgram(
+        DayFlag friday = new DayFlag(
             5,
-            rs.getLong("FRIDAY_MORNING_IN"),
-            rs.getLong("FRIDAY_MORNING_OUT"),
-            rs.getLong("FRIDAY_AFTERNOON_IN"),
-            rs.getLong("FRIDAY_AFTERNOON_OUT")
+            rs.getBoolean("FRIDAY")
         );
 
         return new WeekProgram(id, List.of(monday, tuesday, wednesday, thursday, friday));

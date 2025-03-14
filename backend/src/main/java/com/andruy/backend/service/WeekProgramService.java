@@ -1,10 +1,7 @@
 package com.andruy.backend.service;
 
-import java.time.DayOfWeek;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.temporal.WeekFields;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -14,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.andruy.backend.repository.WeekProgramRepository;
-import com.andruy.backend.util.DayProgram;
+import com.andruy.backend.util.DayFlag;
 import com.andruy.backend.util.EmailSender;
 import com.andruy.backend.util.PushNotification;
 import com.andruy.backend.util.WeekProgram;
@@ -36,7 +33,7 @@ public class WeekProgramService {
 
         WeekProgram weekProgram = weekProgramRepository.getWeekProgram(weekId);
 
-        return weekProgram == null ? improvise(weekId) : weekProgram;
+        return weekProgram == null ? new WeekProgram(weekId, regularWeek()) : weekProgram;
     }
 
     public int setWeekProgram(WeekProgram week) {
@@ -51,26 +48,17 @@ public class WeekProgramService {
         return result;
     }
 
-    private WeekProgram improvise(int weekId) {
-        logger.trace("Improvising new program for week " + weekId);
+    public WeekProgram getWeekForDay(LocalDate date) {
+        String str = "";
 
-        int year = Integer.parseInt(String.valueOf(weekId).substring(0, 4));
-        int weekNumber = Integer.parseInt(String.valueOf(weekId).substring(4));
-
-        List<DayProgram> dayPrograms = new ArrayList<>();
-        WeekProgram weekProgram = new WeekProgram(weekId, dayPrograms);
-
-        for (int i = 0; i < 5; i++) {
-            DayProgram dayProgram = new DayProgram(
-                i + 1,
-                LocalDateTime.of(year, 1, 1, 7, 55).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(weekNumber - 1).plusDays(i).atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli(),
-                LocalDateTime.of(year, 1, 1, 12, 57).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(weekNumber - 1).plusDays(i).atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli(),
-                LocalDateTime.of(year, 1, 1, 13, 55).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(weekNumber - 1).plusDays(i).atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli(),
-                LocalDateTime.of(year, 1, 1, 16, 26).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(weekNumber - 1).plusDays(i).atZone(ZoneId.of("America/New_York")).toInstant().toEpochMilli()
-            );
-            dayPrograms.add(dayProgram);
+        if (date.get(WeekFields.ISO.weekOfYear()) < 10) {
+            str = "0";
         }
 
-        return weekProgram;
+        return getWeekProgram(Integer.parseInt(date.getYear() + str + date.get(WeekFields.ISO.weekOfYear())));
+    }
+
+    private List<DayFlag> regularWeek() {
+        return List.of(new DayFlag(1, true), new DayFlag(2, true), new DayFlag(3, true), new DayFlag(4, true), new DayFlag(5, true));
     }
 }

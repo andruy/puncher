@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "frontend": "file:",
     "next": "15.1.7",
     "primeflex": "^4.0.0",
     "primeicons": "^7.0.0",
