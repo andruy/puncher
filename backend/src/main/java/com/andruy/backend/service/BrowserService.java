@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,9 @@ public class BrowserService {
                 logger.trace("Starting clock in");
                 halt(body.get("timer"));
                 logger.trace("Starting web browser");
-                driver = new ChromeDriver();
+                ChromeOptions options = new ChromeOptions();
+                options.addArguments("--headless");
+                driver = new ChromeDriver(options);
                 driver.get(url);
                 Thread.sleep(AppSettings.getHaltTime());
                 driver.findElement(By.id("LogOnEmployeeId")).sendKeys(username);
@@ -105,8 +108,9 @@ public class BrowserService {
         logger.trace("Checking dashboard");
 
         try {
-            driver = new ChromeDriver();
-            driver.get(url);
+            ChromeOptions options = new ChromeOptions();
+            options.addArguments("--headless");
+            driver = new ChromeDriver(options);
             Thread.sleep(AppSettings.getHaltTime());
             driver.findElement(By.id("LogOnEmployeeId")).sendKeys(username);
             driver.findElement(By.className("DefaultSubmitBehavior")).click();
@@ -140,7 +144,9 @@ public class BrowserService {
                 logger.trace("Starting clock out");
                 halt(body.get("timer"));
                 logger.trace("Starting web browser");
-                driver = new ChromeDriver();
+                ChromeOptions options = new ChromeOptions();
+                options.addArguments("--headless");
+                driver = new ChromeDriver(options);
                 driver.get(url);
                 Thread.sleep(AppSettings.getHaltTime());
                 driver.findElement(By.id("LogOnEmployeeId")).sendKeys(username);
