@@ -20,6 +20,11 @@ export default function MenuButton() {
             label: 'Programs',
             icon: 'pi pi-calendar-clock',
             command: () => router.push('/programs')
+        },
+        {
+            label: 'Logs',
+            icon: 'pi pi-server',
+            command: () => router.push('/logs')
         }
     ]
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from 'react'
-import styles from '../page.module.css'
+import { Button } from 'primereact/button'
 
 export default function Logs() {
     const [text, setText] = useState('Did not find any logs')
@@ -19,18 +19,22 @@ export default function Logs() {
     }
 
     const customStyles = {
-        fontFamily: "'Courier New', Courier, monospace",
-        whiteSpace: "pre",
-        overflowX: "auto"
+        display: "flex",
+        alignItems: "center",
+        maxWidth: "95%",
+        maxHeight: "70vh",
+        overflow: "auto",
+        whiteSpace: "pre"
     }
 
     return (
-        <div className={styles.centeredColumn}>
-            <div className="card">
-                <div className="card-body" style={customStyles}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+            <div style={customStyles}>
+                <p style={{ fontFamily: "'Courier New', Courier, monospace" }}>
                     {text}
-                </div>
+                </p>
             </div>
+            <Button icon="pi pi-refresh" onClick={send} style={{ marginTop: "1rem" }} />
         </div>
     )
 }
