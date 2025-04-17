@@ -1,9 +1,13 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from 'primereact/button'
 
 export default function Logs() {
+    useEffect(() => {
+        send()
+    }, [])
+
     const [text, setText] = useState('Did not find any logs')
 
     async function send() {
@@ -14,27 +18,24 @@ export default function Logs() {
             setText(result.logs)
             return result
         } else {
-            return "Something went wrong"
+            return setText("Something went wrong")
         }
     }
 
     const customStyles = {
-        display: "flex",
-        alignItems: "center",
+        fontFamily: "'Courier New', Courier, monospace",
+        overflowX: "auto",
+        whiteSpace: "pre",
         maxWidth: "95%",
-        maxHeight: "70vh",
-        overflow: "auto",
-        whiteSpace: "pre"
+        marginTop: "6.5rem"
     }
 
     return (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-            <div style={customStyles}>
-                <p style={{ fontFamily: "'Courier New', Courier, monospace" }}>
-                    {text}
-                </p>
-            </div>
-            <Button icon="pi pi-refresh" onClick={send} style={{ marginTop: "1rem" }} />
-        </div>
+        <>
+            <p style={customStyles}>
+                {text}
+            </p>
+            <Button icon="pi pi-refresh" onClick={() => send()} style={{ marginTop: "1rem", marginBottom: "2rem" }} />
+        </>
     )
 }
