@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.andruy.backend.repository.AppRepository;
 import com.andruy.backend.util.AppSettings;
+import com.andruy.backend.util.DayFlag;
 import com.andruy.backend.util.PushNotification;
 import com.andruy.backend.util.TimeTracker;
 
@@ -105,7 +106,12 @@ public class AppService {
         AppSettings.setCurrentWeekId(appRepository.getLatestWeek());
         setAppWeek();
         AppSettings.setWeekProgram(weekProgramService.getWeekProgram(AppSettings.getCurrentWeekId()));
-        AppSettings.setActive(AppSettings.getWeekProgram().dayFlags().get(day).isOn());
+        for (DayFlag dayFlag : AppSettings.getWeekProgram().dayFlags()) {
+            if (dayFlag.day() == day) {
+                AppSettings.setActive(dayFlag.isOn());
+                break;
+            }
+        }
         String status = AppSettings.isActive() ? "ON" : "OFF";
         logger.trace("Switch is " + status + " for day " + day);
     }
