@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.andruy.backend.repository.BrowserRepository;
@@ -239,6 +240,30 @@ public class BrowserService {
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
+    }
+
+    @Scheduled(cron = "0 55 7 * * 1-5")
+    void morningClockIn() {
+        action = "morningClockIn";
+        clockIn(Map.of("timer", true));
+    }
+
+    @Scheduled(cron = "0 57 12 * * 1-5")
+    void morningClockOut() {
+        action = "morningClockOut";
+        clockOut(Map.of("timer", true));
+    }
+
+    @Scheduled(cron = "0 55 13 * * 1-5")
+    void afternoonClockIn() {
+        action = "afternoonClockIn";
+        clockIn(Map.of("timer", true));
+    }
+
+    @Scheduled(cron = "0 26 16 * * 1-5")
+    void afternoonClockOut() {
+        action = "afternoonClockOut";
+        clockOut(Map.of("timer", true));
     }
 
     public Map<String, String> logReader() {
