@@ -11,9 +11,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.andruy.backend.repository.AppRepository;
-import com.andruy.backend.util.ActionScheduler;
 import com.andruy.backend.util.AppSettings;
 import com.andruy.backend.util.PushNotification;
+import com.andruy.backend.util.TimeTracker;
 
 import jakarta.annotation.PostConstruct;
 
@@ -23,9 +23,9 @@ public class AppService {
     private int weekNumber;
     private LocalDate date;
     @Autowired
-    private AppRepository appRepository;
+    private TimeTracker timeTracker;
     @Autowired
-    private ActionScheduler actionScheduler;
+    private AppRepository appRepository;
     @Autowired
     private PushNotification pushNotification;
     @Autowired
@@ -91,34 +91,26 @@ public class AppService {
 
     @PostConstruct
     public void init() {
-        AppSettings.setActive(appRepository.switchState() == 1);
-        AppSettings.setHaltTime(appRepository.currentHaltTime());
-        AppSettings.setCurrentWeekId(appRepository.getLatestWeek());
-        logger.trace("Switch ON? " + AppSettings.isActive());
-        logger.trace("Common halt time at launch: " + AppSettings.getHaltTime());
-        logger.trace("Current week from DB: " + AppSettings.getCurrentWeekId());
-        setAppWeek();
-        Thread thread = new Thread() {
-            public void run() {
-                try {
-                    Thread.sleep(10000);
-                    actionScheduler.schedule(weekProgramService.getWeekProgram(AppSettings.getCurrentWeekId()));
-                } catch (InterruptedException e) {
-                    logger.error("Failed to sleep thread at startup", e);
-                }
-            }
-        };
-        thread.start();
+        setup();
         pushNotification.send("Puncher update", "Puncher is now running");
     }
 
     @Scheduled(cron = "0 5 0 * * 1-7")
-    public void often() {
-        AppSettings.setHaltTime(appRepository.currentHaltTime());
-        logger.trace("Common halt time: " + AppSettings.getHaltTime());
+    public void daily() {
+        setup();
     }
 
-    public void setAppWeek() {
+    private void setup() {
+        int day = timeTracker.getDayOfTheWeek().getValue();
+        AppSettings.setCurrentWeekId(appRepository.getLatestWeek());
+        setAppWeek();
+        AppSettings.setWeekProgram(weekProgramService.getWeekProgram(AppSettings.getCurrentWeekId()));
+        AppSettings.setActive(AppSettings.getWeekProgram().dayFlags().get(day).isOn());
+        String status = AppSettings.isActive() ? "ON" : "OFF";
+        logger.trace("Switch is " + status + " for day " + day);
+    }
+
+    private void setAppWeek() {
         int id = getTrueCurrentWeekId();
 
         if (AppSettings.getCurrentWeekId() == id) {
@@ -128,13 +120,7 @@ public class AppService {
         if (AppSettings.getCurrentWeekId() < id) {
             appRepository.createWeek(id);
             AppSettings.setCurrentWeekId(id);
-            logger.trace("Created week " + id + " in the database and it is now set for the app");
+            logger.trace("Created week " + id + " and it is now set for the app");
         }
-    }
-
-    @Scheduled(cron = "0 5 1 * * 1")
-    public void weekly() {
-        setAppWeek();
-        actionScheduler.schedule(weekProgramService.getWeekProgram(AppSettings.getCurrentWeekId()));
     }
 }

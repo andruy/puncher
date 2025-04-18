@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import com.andruy.backend.repository.WeekProgramRepository;
 import com.andruy.backend.util.DayFlag;
-import com.andruy.backend.util.EmailSender;
 import com.andruy.backend.util.PushNotification;
 import com.andruy.backend.util.WeekProgram;
 
@@ -21,7 +20,7 @@ public class WeekProgramService {
     Logger logger = LoggerFactory.getLogger(WeekProgramService.class);
     @Value("${cv.email}")
     private String email;
-    private EmailSender emailUtil = new EmailSender();
+    // private EmailSender emailUtil = new EmailSender();
     private final String FROM = "Puncher";
     @Autowired
     private WeekProgramRepository weekProgramRepository;
@@ -29,7 +28,7 @@ public class WeekProgramService {
     private PushNotification pushNotification;
 
     public WeekProgram getWeekProgram(int weekId) {
-        logger.trace("Called getWeekProgram for week: " + weekId);
+        logger.trace("Getting program for week: " + weekId);
 
         WeekProgram weekProgram = weekProgramRepository.getWeekProgram(weekId);
 
@@ -37,11 +36,10 @@ public class WeekProgramService {
     }
 
     public int setWeekProgram(WeekProgram week) {
-        logger.trace("Called setWeekProgram for week: " + week.id());
+        logger.trace("Setting program for week: " + week.id());
 
         int result = weekProgramRepository.setWeekProgram(week);
         if (result == 1) {
-            emailUtil.sendEmail(FROM, email, "Created program for week " + week.id());
             pushNotification.send(FROM + " update", "Created program for week " + week.id());
         }
 
