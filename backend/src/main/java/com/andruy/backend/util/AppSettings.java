@@ -3,7 +3,6 @@ package com.andruy.backend.util;
 import java.util.List;
 
 public class AppSettings {
-    private static int haltTime = 7000;
     private static boolean active = true;
     private static boolean timeTracker = false;
     private static int currentWeekId = 0;
@@ -21,14 +20,6 @@ public class AppSettings {
 
     public static void setActive(boolean active) {
         AppSettings.active = active;
-    }
-
-    public static int getHaltTime() {
-        return haltTime;
-    }
-
-    public static void setHaltTime(int haltTime) {
-        AppSettings.haltTime = haltTime;
     }
 
     public static boolean isTimeTracker() {
