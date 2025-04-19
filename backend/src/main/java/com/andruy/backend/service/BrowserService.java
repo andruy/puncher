@@ -5,10 +5,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ThreadLocalRandom;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +16,10 @@ import com.andruy.backend.repository.BrowserRepository;
 import com.andruy.backend.util.AppSettings;
 import com.andruy.backend.util.EmailSender;
 import com.andruy.backend.util.TimeTracker;
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Playwright;
 
 @Service
 public class BrowserService {
@@ -35,7 +35,6 @@ public class BrowserService {
     private EmailSender emailUtil = new EmailSender();
     private final String FROM = "Puncher";
     private String action = "undefined";
-    private WebDriver driver;
     @Autowired
     private TimeTracker timeTracker;
     @Autowired
@@ -45,26 +44,22 @@ public class BrowserService {
         String status;
 
         if (AppSettings.isActive()) {
+            Playwright playwright = Playwright.create();
+            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+            Page page = browser.newPage();
+
             try {
                 logger.trace("Starting clock in");
                 halt(body.get("timer"));
                 logger.trace("Starting web browser");
-                ChromeOptions options = new ChromeOptions();
-                options.addArguments("--headless");
-                driver = new ChromeDriver(options);
-                driver.get(url);
-                Thread.sleep(AppSettings.getHaltTime());
-                driver.findElement(By.id("LogOnEmployeeId")).sendKeys(username);
-                driver.findElement(By.className("BtnGreen")).click();
-                Thread.sleep(AppSettings.getHaltTime());
-                driver.findElement(By.cssSelector("input[type='password'].CustomControlInput")).sendKeys(password);
-                driver.findElement(By.cssSelector("input[type='submit'].BtnAction.DefaultSubmitBehavior")).click();
-                Thread.sleep(AppSettings.getHaltTime());
-                driver.findElement(By.cssSelector("input[type='submit'].BtnAction.DefaultSubmitBehavior")).click();
-                Thread.sleep(AppSettings.getHaltTime());
-                driver.findElement(By.cssSelector("input[type='submit'].BtnAction.DefaultSubmitBehavior")).click();
-                Thread.sleep(AppSettings.getHaltTime());
-                status = driver.findElement(By.cssSelector("td.AlertContainer")).getText();
+                page.navigate(url);
+                page.fill("#LogOnEmployeeId", username);
+                page.click(".BtnGreen");
+                page.fill("input[type='password'].CustomControlInput", password);
+                page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
+                page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
+                // page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
+                status = page.textContent("td.AlertContainer");
                 logger.trace(status);
 
                 if (status.equals("Clock In operation successful")) {
@@ -81,20 +76,15 @@ public class BrowserService {
                     logger.warn("Failed to clock in");
                 }
 
-                logger.trace("Closing web browser");
-                driver.close();
-                driver.quit();
-
                 logger.trace("Sending email");
-                emailUtil.sendEmail(FROM, email, status);
+                // emailUtil.sendEmail(FROM, email, status);
             } catch (Exception e) {
                 logger.error(e.getMessage());
-                if (driver != null) {
-                    driver.close();
-                    driver.quit();
-                }
-                emailUtil.sendEmail(FROM, email, e.getMessage());
+                // emailUtil.sendEmail(FROM, email, e.getMessage());
                 status = "Something went wrong";
+            } finally {
+                browser.close();
+                playwright.close();
             }
         } else {
             status = "Puncher is stopped";
@@ -108,30 +98,31 @@ public class BrowserService {
 
         logger.trace("Checking dashboard");
 
+        Playwright playwright = Playwright.create();
+        Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+        Page page = browser.newPage();
+
         try {
-            ChromeOptions options = new ChromeOptions();
-            options.addArguments("--headless");
-            driver = new ChromeDriver(options);
-            Thread.sleep(AppSettings.getHaltTime());
-            driver.findElement(By.id("LogOnEmployeeId")).sendKeys(username);
-            driver.findElement(By.className("DefaultSubmitBehavior")).click();
-            Thread.sleep(AppSettings.getHaltTime());
-            driver.findElement(By.cssSelector("input[type='password'].CustomControlInput")).sendKeys(password);
-            driver.findElement(By.cssSelector("input[type='submit'].BtnAction.DefaultSubmitBehavior")).click();
-            Thread.sleep(AppSettings.getHaltTime());
-            status = driver.findElement(By.cssSelector("div[ng-bind='getEmployeeClockStatus()']")).getText();
+            logger.trace("Starting web browser");
+            page.navigate(url);
+            page.fill("#LogOnEmployeeId", username);
+            page.click("//*[@id=\"featureForm\"]/div[2]/div[1]/div/div[2]/table/tbody/tr[10]/td[2]/span/input");
+            status = page.textContent("td.AlertContainer");
             logger.trace(status);
-            driver.findElement(By.cssSelector("div[ng-click='logOutEmployee()']")).click();
-            Thread.sleep(1000);
-            driver.close();
-            driver.quit();
+
+            if (status.equals("Clock In operation successful")) {
+                status = "Clocked in";
+                logger.trace("Dashboard is up and running");
+            } else {
+                logger.warn("Failed to check dashboard");
+                status = "Failed to check dashboard";
+            }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            if (driver != null) {
-                driver.close();
-                driver.quit();
-            }
             status = "Something went wrong";
+        } finally {
+            browser.close();
+            playwright.close();
         }
 
         return Map.of("message", status);
@@ -141,26 +132,22 @@ public class BrowserService {
         String status;
 
         if (AppSettings.isActive()) {
+            Playwright playwright = Playwright.create();
+            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+            Page page = browser.newPage();
+    
             try {
                 logger.trace("Starting clock out");
                 halt(body.get("timer"));
                 logger.trace("Starting web browser");
-                ChromeOptions options = new ChromeOptions();
-                options.addArguments("--headless");
-                driver = new ChromeDriver(options);
-                driver.get(url);
-                Thread.sleep(AppSettings.getHaltTime());
-                driver.findElement(By.id("LogOnEmployeeId")).sendKeys(username);
-                driver.findElement(By.cssSelector("input[type='submit'].tcp-btn.BtnAction")).click();
-                Thread.sleep(AppSettings.getHaltTime());
-                driver.findElement(By.cssSelector("input[type='password'].CustomControlInput")).sendKeys(password);
-                driver.findElement(By.cssSelector("input[type='submit'].BtnAction.DefaultSubmitBehavior")).click();
-                Thread.sleep(AppSettings.getHaltTime());
-                driver.findElement(By.cssSelector("input[type='submit'].BtnAction.DefaultSubmitBehavior")).click();
-                Thread.sleep(AppSettings.getHaltTime());
-                driver.findElement(By.cssSelector("input[type='submit'].BtnAction.DefaultSubmitBehavior")).click();
-                Thread.sleep(AppSettings.getHaltTime());
-                status = driver.findElement(By.cssSelector("td.AlertContainer")).getText();
+                page.navigate(url);
+                page.fill("#LogOnEmployeeId", username);
+                page.click(".BtnGreen");
+                page.fill("input[type='password'].CustomControlInput", password);
+                page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
+                page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
+                // page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
+                status = page.textContent("td.AlertContainer");
                 logger.trace(status);
 
                 if (status.equals("Clock Out operation successful")) {
@@ -179,20 +166,14 @@ public class BrowserService {
                     logger.warn("Failed to clock out");
                 }
 
-                logger.trace("Closing web browser");
-                driver.close();
-                driver.quit();
-
                 logger.trace("Sending email");
-                emailUtil.sendEmail(FROM, email, status);
+                // emailUtil.sendEmail(FROM, email, status);
             } catch (Exception e) {
                 logger.error(e.getMessage());
-                if (driver != null) {
-                    driver.close();
-                    driver.quit();
-                }
-                emailUtil.sendEmail(FROM, email, e.getMessage());
                 status = "Something went wrong";
+            } finally {
+                browser.close();
+                playwright.close();
             }
         } else {
             status = "Puncher is stopped";
