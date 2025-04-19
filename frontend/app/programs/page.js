@@ -10,6 +10,7 @@ import DayCard from '../DayCard'
 import styles from '../page.module.css'
 
 export default function Programs() {
+	const rootPath = process.env.NEXT_PUBLIC_API_URL
     const stepperRef = useRef(null)
     const [date, setDate] = useState(null)
     const [weekNumber, setWeekNumber] = useState('?')
@@ -21,17 +22,17 @@ export default function Programs() {
     const toast = useRef(null)
 
     useEffect(() => {
-        date && send()
+        date && send(date)
     }, [date])
 
-    async function send() {
+    async function send(theDate) {
         const formData = new FormData()
-        formData.append('date', date.toISOString().split('T')[0])
+        formData.append('date', theDate.toISOString().split('T')[0])
         const queryString = new URLSearchParams(formData).toString()
 
         !weekButtonIsDisabled && setWeekButtonIsDisabled(true)
         setWeekNumber('?')
-        const response = await fetch('/forDay' + `?${queryString}`)
+        const response = await fetch(rootPath + '/forDay' + `?${queryString}`)
 
         if (response.ok) {
             const result = await response.json()
@@ -56,7 +57,7 @@ export default function Programs() {
 
     async function sendNewProgram() {
         setSendButtonIsDisabled(true)
-        const response = await fetch('/setWeekProgram', {
+        const response = await fetch(rootPath + '/setWeekProgram', {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -76,6 +77,27 @@ export default function Programs() {
             toast.current.show({ severity: 'error', summary: 'Error', detail: 'Something went wrong' })
             return "Something went wrong"
         }
+    }
+
+    function refreshOnPrevCallback() {
+        stepperRef.current.prevCallback()
+        send(date)
+    }
+
+    function checkAllWeeksOfMonth() {
+        const firstDayOfMonth = new Date(date.getFullYear(), date.getMonth(), 1) // Get the first day of the month [1.2.2].
+        const dayOfWeek = firstDayOfMonth.getDay() // Get the day of the week (0-6, Sunday is 0) [1.7.2, 1.5.3].
+
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+            // If the first day of the month is Sunday or Saturday, set it to Monday [1.5.3].
+            firstDayOfMonth.setDate(firstDayOfMonth.getDate() + (dayOfWeek === 0 ? 1 : 2))
+        }
+
+        // firstDayOfMonth.get
+
+        const diff = (8 - dayOfWeek) % 7 // Calculate the difference in days to reach the first Monday [1.8.2].
+
+        const firstMonday = new Date(firstDayOfMonth.getFullYear(), firstDayOfMonth.getMonth(), 1 + diff) // Construct a new Date object for the first Monday [1.2.2, 1.8.2].
     }
 
     return (
@@ -102,7 +124,7 @@ export default function Programs() {
                             setNewProgram={setNewProgram}
                         />
                         <div className={styles.spreadApart}>
-                            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" onClick={() => stepperRef.current.prevCallback()} />
+                            <Button label="Back" severity="secondary" icon="pi pi-arrow-left" onClick={refreshOnPrevCallback} />
                             <Button label="Send" icon="pi pi-send" iconPos="right" onClick={sendNewProgram} disabled={sendButtonIsDisabled} />
                         </div>
                     </div>

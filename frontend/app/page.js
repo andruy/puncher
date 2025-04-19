@@ -8,16 +8,17 @@ import Loading from './Loading'
 import styles from './page.module.css'
 
 export default function Home() {
+	const rootPath = process.env.NEXT_PUBLIC_API_URL
 	const [checked, setChecked] = useState(false)
 	const [loadingVisible, setLoadingVisible] = useState(false)
 	const [isDisabled, setIsDisabled] = useState(true)
 	const toast = useRef(null)
 
 	const endpoints = {
-		checkStatus: '/check',
-		switchState: '/switchState',
-		switchOn: '/switchOn',
-		switchOff: '/switchOff'
+		checkStatus: rootPath + '/check',
+		switchState: rootPath + '/switchState',
+		switchOn: rootPath + '/switchOn',
+		switchOff: rootPath + '/switchOff'
 	}
 
 	useEffect(() => {
@@ -26,7 +27,7 @@ export default function Home() {
 	}, [])
 
 	async function healthCheck() {
-		const response = await fetch('healthCheck')
+		const response = await fetch(rootPath + '/healthCheck')
 
 		if (response.ok) {
 			const data = await response.json()

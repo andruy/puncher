@@ -8,14 +8,15 @@ import Loading from '../Loading'
 import styles from '../page.module.css'
 
 export default function Features() {
+	const rootPath = process.env.NEXT_PUBLIC_API_URL
     const [clockInVisible, setClockInVisible] = useState(false)
     const [clockOutVisible, setClockOutVisible] = useState(false)
     const [loadingVisible, setLoadingVisible] = useState(false)
     const toast = useRef(null)
 
     const endpoints = {
-        clockIn: '/clockIn',
-        clockOut: '/clockOut'
+        clockIn: rootPath + '/clockIn',
+        clockOut: rootPath + '/clockOut'
     }
 
     const clockInFooter = (

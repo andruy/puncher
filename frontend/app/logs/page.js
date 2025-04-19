@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { Button } from 'primereact/button'
 
 export default function Logs() {
+	const rootPath = process.env.NEXT_PUBLIC_API_URL
+
     useEffect(() => {
         send()
     }, [])
@@ -11,7 +13,7 @@ export default function Logs() {
     const [text, setText] = useState('Did not find any logs')
 
     async function send() {
-        const response = await fetch('/logReader')
+        const response = await fetch(rootPath + '/logReader')
 
         if (response.ok) {
             const result = await response.json()
