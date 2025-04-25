@@ -12,7 +12,7 @@ public class BrowserRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    public double getCurrentTimeForTheDay(DayOfWeek dayOfWeek, int id) {
+    public Double getCurrentTimeForTheDay(DayOfWeek dayOfWeek, int id) {
         String query = "SELECT " + dayOfWeek + " FROM WEEKLY_HOURS WHERE ID = ?";
 
         return jdbcTemplate.queryForObject(query, Double.class, id);

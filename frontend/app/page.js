@@ -72,11 +72,9 @@ export default function Home() {
 			if (data.message === 'Something went wrong') {
 				toast.current.show({ severity: 'error', summary: 'Error', detail: data.message })
 			} else {
+				toast.current.show({ severity: 'info', summary: 'State', detail: data.message})
 				if (endpoint === endpoints.switchState) {
 					setChecked(data.state)
-					toast.current.show({ severity: 'info', summary: 'State', detail: data.message})
-				} else {
-					toast.current.show({ severity: 'warning', summary: 'Status', detail: data.message })
 				}
 			}
 		} else {

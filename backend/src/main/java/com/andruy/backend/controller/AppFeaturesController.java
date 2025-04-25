@@ -4,18 +4,18 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-// import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.andruy.backend.service.AppService;
+import com.andruy.backend.service.AppFeaturesService;
 
-// @CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*")
 @RestController
-public class AppController {
+public class AppFeaturesController {
     @Autowired
-    private AppService appService;
+    private AppFeaturesService appService;
 
     @PutMapping("/switchOn")
     public ResponseEntity<Map<String, String>> switchOn() {
