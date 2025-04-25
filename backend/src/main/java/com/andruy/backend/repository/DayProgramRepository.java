@@ -3,6 +3,7 @@ package com.andruy.backend.repository;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -15,9 +16,16 @@ public class DayProgramRepository {
     private JdbcTemplate jdbcTemplate;
 
     public DayProgram getDay(int year, int month, int day) {
-        String sql = "SELECT SWITCH FROM DAY_COMMAND WHERE YEAR = ? AND MONTH = ? AND DAY = ?";
+        String sql = "SELECT * FROM DAY_COMMAND WHERE YEAR = ? AND MONTH = ? AND DAY = ? AND ROWNUM = 1";
+        DayProgram dayProgram;
 
-        return jdbcTemplate.queryForObject(sql, DayProgram.class, year, month, day);
+        try {
+            dayProgram = jdbcTemplate.queryForObject(sql, new DayProgramRowMapper(), year, month, day);
+        } catch (EmptyResultDataAccessException e) {
+            dayProgram = null;
+        }
+
+        return dayProgram;
     }
 
     public List<DayProgram> getMonthDays(int year, int month) {

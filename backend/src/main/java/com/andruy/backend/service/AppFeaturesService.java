@@ -2,7 +2,6 @@ package com.andruy.backend.service;
 
 import java.time.LocalDate;
 import java.time.temporal.WeekFields;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -105,11 +104,12 @@ public class AppFeaturesService {
         AppFeatures.setCurrentWeekId(appRepository.getLatestWeek());
         setAppWeek();
         int day = today.getDayOfWeek().getValue();
-        List<DayProgram> list = dayProgramRepository.getMonthDays(today.getYear(), today.getMonthValue());
-        list.stream()
-            .filter(dayProgram -> dayProgram.date().equals(today))
-            .findFirst()
-            .ifPresent(dayProgram -> isPreset = dayProgram.switchValue());
+        DayProgram dayProgram = dayProgramRepository.getDay(today.getYear(), today.getMonthValue(), today.getDayOfMonth());
+
+        if (dayProgram != null) {
+            isPreset = dayProgram.switchValue();
+        }
+
         if (isPreset != null) {
             AppFeatures.setActive(isPreset);
             if (isPreset) {
@@ -124,6 +124,7 @@ public class AppFeaturesService {
         } else {
             AppFeatures.setActive(appRepository.switchState() == 1);
         }
+
         String status = AppFeatures.isActive() ? "ON" : "OFF";
         logger.trace("Switch is " + status + " for day " + day);
     }
