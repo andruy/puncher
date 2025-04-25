@@ -45,7 +45,7 @@ public class BrowserService {
 
         if (AppFeatures.isActive()) {
             Playwright playwright = Playwright.create();
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
             Page page = browser.newPage();
 
             try {
@@ -99,7 +99,7 @@ public class BrowserService {
         logger.trace("Checking dashboard");
 
         Playwright playwright = Playwright.create();
-        Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+        Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
         Page page = browser.newPage();
 
         try {
@@ -145,7 +145,7 @@ public class BrowserService {
 
         if (AppFeatures.isActive()) {
             Playwright playwright = Playwright.create();
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
             Page page = browser.newPage();
     
             try {
