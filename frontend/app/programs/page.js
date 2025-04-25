@@ -4,7 +4,6 @@ import { useRef, useState, useEffect } from 'react'
 import { Button } from 'primereact/button'
 import { Calendar } from 'primereact/calendar'
 import { Toast } from 'primereact/toast'
-import DayCard from '../DayCard'
 import Loading from '../Loading'
 import styles from '../page.module.css'
 
