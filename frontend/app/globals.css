@@ -109,3 +109,7 @@ body {
   font-size: 12px;
   text-align: center;
 }
+
+.no-month-view .p-datepicker-header {
+  display: none !important;
+}

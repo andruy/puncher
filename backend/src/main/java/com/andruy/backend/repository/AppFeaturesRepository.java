@@ -5,7 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AppRepository {
+public class AppFeaturesRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -21,31 +21,31 @@ public class AppRepository {
         return jdbcTemplate.update(query);
     }
 
-    public int switchState() {
+    public Integer switchState() {
         String query = "SELECT STATE FROM SWITCH_MANAGEMENT WHERE NAME = 'APP'";
 
         return jdbcTemplate.queryForObject(query, Integer.class);
     }
 
-    public int healthCheck() {
+    public Integer healthCheck() {
         String query = "SELECT 1 FROM DUAL";
 
         return jdbcTemplate.queryForObject(query, Integer.class);
     }
 
-    public int currentHaltTime() {
+    public Integer currentHaltTime() {
         String query = "SELECT CURRENT_VALUE FROM HALTS WHERE IN_REFERENCE = 'COMMON'";
 
         return (jdbcTemplate.queryForObject(query, Integer.class));
     }
 
-    public int createWeek(int id) {
+    public Integer createWeek(int id) {
         String query = "INSERT INTO WEEKLY_HOURS (ID) VALUES (?)";
 
         return jdbcTemplate.update(query, id);
     }
 
-    public int getLatestWeek() {
+    public Integer getLatestWeek() {
         String query = "SELECT ID FROM WEEKLY_HOURS WHERE ROWNUM = 1 ORDER BY ID DESC";
 
         return jdbcTemplate.queryForObject(query, Integer.class);

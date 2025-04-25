@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.andruy.backend.model.AppFeatures;
 import com.andruy.backend.repository.BrowserRepository;
-import com.andruy.backend.util.AppSettings;
 import com.andruy.backend.util.EmailSender;
 import com.andruy.backend.util.TimeTracker;
 import com.microsoft.playwright.Browser;
@@ -43,9 +43,9 @@ public class BrowserService {
     public Map<String, String> clockIn(Map<String, Boolean> body) {
         String status;
 
-        if (AppSettings.isActive()) {
+        if (AppFeatures.isActive()) {
             Playwright playwright = Playwright.create();
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
             Page page = browser.newPage();
 
             try {
@@ -58,7 +58,7 @@ public class BrowserService {
                 page.fill("input[type='password'].CustomControlInput", password);
                 page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
                 page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
-                // page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
+                page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
                 status = page.textContent("td.AlertContainer");
                 logger.trace(status);
 
@@ -77,10 +77,10 @@ public class BrowserService {
                 }
 
                 logger.trace("Sending email");
-                // emailUtil.sendEmail(FROM, email, status);
+                emailUtil.sendEmail(FROM, email, status);
             } catch (Exception e) {
                 logger.error(e.getMessage());
-                // emailUtil.sendEmail(FROM, email, e.getMessage());
+                emailUtil.sendEmail(FROM, email, e.getMessage());
                 status = "Something went wrong";
             } finally {
                 browser.close();
@@ -94,12 +94,12 @@ public class BrowserService {
     }
 
     public Map<String, String> checkDashboard() {
-        String status;
+        String status = "";
 
         logger.trace("Checking dashboard");
 
         Playwright playwright = Playwright.create();
-        Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+        Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
         Page page = browser.newPage();
 
         try {
@@ -107,19 +107,31 @@ public class BrowserService {
             page.navigate(url);
             page.fill("#LogOnEmployeeId", username);
             page.click("//*[@id=\"featureForm\"]/div[2]/div[1]/div/div[2]/table/tbody/tr[10]/td[2]/span/input");
-            status = page.textContent("td.AlertContainer");
-            logger.trace(status);
-
-            if (status.equals("Clock In operation successful")) {
-                status = "Clocked in";
-                logger.trace("Dashboard is up and running");
-            } else {
-                logger.warn("Failed to check dashboard");
-                status = "Failed to check dashboard";
+            page.fill("//*[@id=\"LogOnEmployeePassword\"]", password);
+            page.click("//*[@id=\"EmployeeCredentialsEntryhtml\"]/div/div/div/div[3]/input[2]");
+            int i = 0;
+            while (i < 15) {
+                if (page.textContent("xpath=/html/body/div[3]/div[1]/div/header/div[4]/div/div/div[2]/div[1]/div[1]").contains("Clocked")) {
+                    status = page.textContent("xpath=/html/body/div[3]/div[1]/div/header/div[4]/div/div/div[2]/div[1]/div[1]");
+                    logger.trace("Current status: " + status);
+                    break;
+                } else {
+                    logger.trace("Waiting for status to be visible and show current status");
+                    page.waitForTimeout(2000);
+                    i++;
+                }
             }
+            status = page.textContent("xpath=/html/body/div[3]/div[1]/div/header/div[4]/div/div/div[2]/div[1]/div[1]");
+            logger.trace("Current status: " + status);
+            page.click("xpath=/html/body/div[3]/div[1]/div/header/div[4]/div/span");
+            page.click("xpath=/html/body/div[3]/div[1]/div/header/div[4]/div/div/div[3]/div/div[2]/div/span");
         } catch (Exception e) {
-            logger.error(e.getMessage());
-            status = "Something went wrong";
+            if (status.contains("Clocked")) {
+                logger.warn("Unable to logout");
+            } else {
+                logger.error(e.getMessage());
+                status = "Something went wrong";
+            }
         } finally {
             browser.close();
             playwright.close();
@@ -131,9 +143,9 @@ public class BrowserService {
     public Map<String, String> clockOut(Map<String, Boolean> body) {
         String status;
 
-        if (AppSettings.isActive()) {
+        if (AppFeatures.isActive()) {
             Playwright playwright = Playwright.create();
-            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
+            Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
             Page page = browser.newPage();
     
             try {
@@ -146,7 +158,7 @@ public class BrowserService {
                 page.fill("input[type='password'].CustomControlInput", password);
                 page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
                 page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
-                // page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
+                page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
                 status = page.textContent("td.AlertContainer");
                 logger.trace(status);
 
@@ -167,9 +179,10 @@ public class BrowserService {
                 }
 
                 logger.trace("Sending email");
-                // emailUtil.sendEmail(FROM, email, status);
+                emailUtil.sendEmail(FROM, email, status);
             } catch (Exception e) {
                 logger.error(e.getMessage());
+                emailUtil.sendEmail(FROM, email, e.getMessage());
                 status = "Something went wrong";
             } finally {
                 browser.close();
@@ -204,19 +217,22 @@ public class BrowserService {
                 double time = timeTracker.getTotalHours(map.get("final"), map.get("initial"));
 
                 logger.trace("Updating DB with " + time);
-                browserRepository.updateTime(timeTracker.getDayOfTheWeek(), time, AppSettings.getCurrentWeekId());
+                browserRepository.updateTime(timeTracker.getDayOfTheWeek(), time, AppFeatures.getCurrentWeekId());
             }
 
             if (action.equals("afternoonClockOut")) {
                 logger.trace("Querying DB for previous hours");
-                double temp = browserRepository.getCurrentTimeForTheDay(timeTracker.getDayOfTheWeek(), AppSettings.getCurrentWeekId());
+                Double temp = browserRepository.getCurrentTimeForTheDay(timeTracker.getDayOfTheWeek(), AppFeatures.getCurrentWeekId());
 
                 logger.trace("Querying DB for current hours");
                 Map<String, Long> map = browserRepository.getCurrentHours(action, "afternoonClockIn");
-                double time = temp + timeTracker.getTotalHours(map.get("final"), map.get("initial"));
+                double time = temp != null ?
+                        temp + timeTracker.getTotalHours(map.get("final"), map.get("initial"))
+                        :
+                        timeTracker.getTotalHours(map.get("final"), map.get("initial"));
 
                 logger.trace("Updating DB with " + time);
-                browserRepository.updateTime(timeTracker.getDayOfTheWeek(), time, AppSettings.getCurrentWeekId());
+                browserRepository.updateTime(timeTracker.getDayOfTheWeek(), time, AppFeatures.getCurrentWeekId());
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
