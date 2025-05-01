@@ -154,7 +154,7 @@ public class BrowserService {
                 logger.trace("Starting web browser");
                 page.navigate(url);
                 page.fill("#LogOnEmployeeId", username);
-                page.click(".BtnGreen");
+                page.click(".BtnAction");
                 page.fill("input[type='password'].CustomControlInput", password);
                 page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
                 page.click("input[type='submit'].BtnAction.DefaultSubmitBehavior");
