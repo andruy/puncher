@@ -44,7 +44,13 @@ public class DayProgramService {
     public List<DayProgram> getMonthDays(int year, int month) {
         logger.trace("Requesting days for the month of " + Month.of(month));
 
-        return dayProgramRepository.getMonthDays(year, month);
+        List<DayProgram> list = dayProgramRepository.getMonthDays(year, month);
+
+        for (DayProgram day : list) {
+            logger.trace("Day " + day.date().getDayOfMonth() + " is " + (day.switchValue() == true ? "ON" : "OFF"));
+        }
+
+        return list;
     }
 
     public Map<String, Object> setDay(LocalDate date, boolean switchValue) {
